@@ -1,0 +1,12 @@
+ # crystal structure from graphene.XV
+ CRYSTAL
+ # Cell vectors in Angstroem:
+ PRIMVEC
+   2.1594370   1.2467550   0.0000000
+   2.1594360  -1.2467540   0.0000000
+   0.0000000   0.0000000  20.0000000
+ # Atom coordinates in Angstroem:
+ PRIMCOORD
+    2    1
+   6          2.87922989         -0.00001484          0.00001980
+   6          1.43961017          0.00000346          0.00002000

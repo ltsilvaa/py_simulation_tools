@@ -1,0 +1,17 @@
+{
+"SIESTA":{
+    "siesta":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/siesta",
+    "fcbuild":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/fcbuild",
+    "vibra":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/vibra",
+    "xv2xsf":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/xv2xsf",
+    "gnubands":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/gnubands -G -F -o bands",
+    "gnubands_ph":"/home/usr/bin/siesta-5.0.0/MPICH2/bin/gnubands -G -o bands"
+    },
+
+"QE":{
+    "pw":"/home/usr/qe-7.5/bin/pw.x -in",
+    "ph":"/home/usr/qe-7.5/bin/ph.x -in",
+    "bands":""
+}
+
+}
