@@ -1,0 +1,108 @@
+# ==============================================================================
+# Input altomatically generated from the .yaml file
+# ==============================================================================
+
+# --- Name --- 
+SystemName          {{ sim_name | default('siesta') }}
+SystemLabel         {{ sim_name | default('siesta') }}
+
+# --- Numbers ---
+NumberOfAtoms       {{ n_atoms }}
+NumberOfSpecies     {{ species | length }}
+
+# --- Labels ---
+%block ChemicalSpeciesLabel
+{% for s in species -%}
+   {{ s.id }}  {{ s.atomic_number }}  {{ s.symbol }}
+{%- endfor %}
+%endblock ChemicalSpeciesLabel
+
+# --- PAO Basis ---
+PAO.BasisSize       {{ basis_size | default('DZP') }}
+PAO.EnergyShift     {{ energy_shift | default('0.01 Ry') }}
+
+# --- SCF ---
+SolutionMethod      Diagon
+MaxSCFIterations    2000
+ElectronicTemperature 300 K
+SCF.Mixer.Method pulay
+SCF.Mixer.Weight 0.05
+SCF.Mixer.History 10
+SCF.Mixer.Restart 30
+SCF.Mixer.Restart.Save 4
+SCF.Mixer.Linear.After 0
+SCF.Mixer.Linear.After.Weight 0.1
+SCF.DM.Tolerance    {{ dm_tol | default('1d-6') }}
+
+# --- MD ---
+MD.TypeOfRun        {{ md_type | default('CG') }}
+MD.steps            {{ md_steps | default(5000) }}
+MD.MaxDispl 0.2 Ang
+MD.UseSaveXV false
+MD.UseSaveCG false
+DM.UseSaveDM        {{ use_dm | default('false') }}
+UseSaveData         {{ use_data | default('false') }}
+MD.MaxForceTol      {{ force_tol | default('0.01 eV/Ang') }}
+MD.MaxStressTol     {{ stress_tol | default('0.0 GPa') }}
+
+# --- Mesh ---
+Mesh.Cutoff         {{ mesh_cutoff | default('300 Ry') }}
+
+# --- Charge & Spin ---
+NetCharge           {{ mesh_cutoff | default('0') }}
+Spin                {{ mesh_cutoff | default('non-polarized') }}
+
+# --- Kpoints --- 
+%block kgrid_Monkhorst_Pack
+   {{ kp.x }}        0          0        0.0
+       0         {{ kp.y }}     0        0.0
+       0             0      {{ kp.z }}   0.0
+%endblock kgrid_Monkhorst_Pack
+
+# --- DOS ---
+{%if dos_calc == 'true' -%}
+%block ProjectedDensityOfStates
+    {dos_config | default('-15.00 15.00 0.0500 10000 eV')}
+%endblock ProjectedDensityOfStates
+
+# --- Bands ---
+{%if bands_calc == 'true' -%}
+BandLinesScale ReciprocalLatticeVectors
+%block BandLines
+    {band_path}
+%endblock BandLines
+
+# --- Lattice ---
+FixAuxiliaryCell   {{ aux_cell | default('false') }}
+MD.VariableCell    {{ var_cell | default('true') }}
+%block LatticeVectors
+{% for vector in lattice -%}
+    {% for v in vector -%}
+        {{ "%10.5f" | format(v) }}
+    {%- endfor %}
+{% endfor -%}
+%endblock LatticeVectors
+
+# --- Geometry ---
+AtomicCoordinatesFormat    {{ inp_format | default('Ang') }}
+AtomCoorFormatOut          {{ out_format | default('Ang') }}
+%block AtomicCoordinatesAndAtomicSpecies
+{% for atom in atoms -%}
+    {% for cord in atom -%}
+        {{ "%10.6f" | format(cord) }}
+    {%- endfor %}    
+{%- endfor %}
+%endblock AtomicCoordinatesAndAtomicSpecies
+
+# --- Constrains ---
+{%if constrains == 'true' -%}
+    %block GeometryConstraints
+    {% for c in sys_constrains -%}
+        {{ c }}
+    {%- endfor %}
+    %endblock GeometryConstraints
+
+# --- Write ---
+{% for w in write -%}
+    {{ w }}
+{%- endfor %}
