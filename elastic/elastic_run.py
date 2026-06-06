@@ -1,45 +1,25 @@
 import os
+from core.global_config.config_yaml import config
+from core.run.run_sim import execute_simulation_code as run
 import deformation as df
-import copy_imput_files
-from siesta.utils import 
 from ase.geometry import Cell
 
-calculators = {
-    "siesta": siesta_run,
-    "quantumespresso": qe_run,
-    "cp2k": cp2k_run,
-    "onetep": onetep_run,
-    "castep": castep_run,
-    "vasp": vasp_run,
-}
+def deformations_per_symmetry(R0, dim: str):
+    """
 
-def siesta_run(input_path):
-    import siesta.calculators.siesta as c
-    return c(input_path,)
+    """
+    if dim == "1":
+        R0[2,2] = "0.00"
+        R0[1,1] = "0.00"
+    elif dim == "2":
+        R0[2,2] = "0.00"
 
-def qe_run():
-    import qe.calculators.pw as c
-    return c()
-
-def cp2k_run():
-    import cp2k.calculators. as c
-    return c()
-
-def onetep_run():
-    import onetep.calculators.onetep as c
-    return c()
-
-def vasp_run():
-    import vasp.calculators. as c
-    return c()
-
-def castep_run():
-    import castep.calculators. as c
-    return c()
-
-def deformations_per_symmetry(R0):
     cell = Cell(R0)
     cell_type = cell.get_bravais_lattice().name
+
+    if config.get('bm_only', False):
+        return [df.def_isotropic]
+
     if R0[2,2] != "0.00":
         if cell_type == "CUB":
             return [df.def_11, df.def_,df.def_df.def_]
@@ -65,33 +45,37 @@ def deformations_per_symmetry(R0):
         elif cell_type == "OBL":
             return [df.def_11, df.def_12, df.def_16, df.def_26, df.def_22, df.def_66]
 
-def run_deformations(R0, max_deformation: float, deformations_number: int, run_type: str, calculation_path: str, dimension: str):
+def run_deformations(R0, working_dir: str, dimension: str):
     """
     
     """
-    deformations_energies = []
-    deformations = deformations_per_symmetry(R0)
+    s_e = []
+    deformations = deformations_per_symmetry(R0, dim=dimension)
+    max_deformation = float(config.get('max_def',0.01))
+    deformations_number = int(config.get('num_def',7))
 
     eps = [(-max_deformation + (max_deformation/(deformations_number/2))*i) for i in range(deformations_number)]
     for deform in deformations:
         for j in eps:
-            strain_energy = []
-            os.makedirs(os.path.join(calculation_path,str(deform),f"{eps:1}"),exist_ok=True)
+            path = os.path.join(working_dir,str(deform),f"{eps:1}")
+            os.makedirs(path,exist_ok=True)
             R = deform(R0, j)
-
-            ##find replace R na variavel de imput
-            #copy_input_files(path_deformation)
-            path_output = calculators[run_type](calculation_path)
+            build_deformation_input(R0, run)
+            #copy pseudo if is siesta
+            path_output = run(path)
             total_energy = find_energy()
-            strain_energy.append([j,total_energy])
+            s_e.append([str(j), total_energy])
+
+            if j == 0.00:
+                e0 = total_energy #unstrained energy
             
-        with open(os.path.join(calculation_path,f"strain_energy_{deform}.dat"), "w") as outfile:
-            for line in strain_energy:
-                outfile.write(f"{line[0]:12.6f} {line[1]:12.6f}\n")
+        with open(os.path.join(run_path,f"strain_energy_{deform}.dat"), "w") as outfile:
+            for line in s_e:
+                outfile.write(f"{line[0]:12.6f} {line[1]-e0:12.6f}\n")
 
-        deformations_energies.append(strain_energy)
+        strain_energy.append(s_e)
 
-    return deformations_energies    
+    return strain_energy    
 
             
 

@@ -3,6 +3,10 @@ import json
 
 def load_periodic_table():
     """
+        Load the .json file with the periodic table information for various elements.
+    
+        Args: None
+        Returns: None
     """
     current_dir = os.path.dirname(__file__) 
     periodic_table_file_path = os.paht.join(current_dir,"periodic_table.json")

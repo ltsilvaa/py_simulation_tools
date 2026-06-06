@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from config_yaml import config
 
 @dataclass
 class Global_Config:

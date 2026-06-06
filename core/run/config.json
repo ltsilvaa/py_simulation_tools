@@ -1,0 +1,18 @@
+{
+    "SIESTA":{
+        "siesta":"siesta",
+        "fcbuild":"fcbuild",
+        "vibra":"vibra",
+        "xv2xsf":"xv2xsf",
+        "gnubands":"gnubands -G -F -o bands",
+        "gnubands_ph":"gnubands -G -o bands"
+        },
+
+    "QE":{
+        "pw":"pw.x -in",
+        "ph":"ph.x -in",
+        "bands":"bands.x -in",
+        "epsilon":"epsilon -in",
+        "dos":"dos -in" 
+    }
+}
