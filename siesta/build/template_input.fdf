@@ -64,6 +64,13 @@ Spin                {{ mesh_cutoff | default('non-polarized') }}
 %block ProjectedDensityOfStates
     {dos_config | default('-15.00 15.00 0.0500 10000 eV')}
 %endblock ProjectedDensityOfStates
+ 
+%block DOS.kgrid_Monkhorst_Pack
+   {{ kpd.x | default(4*kp.x) }}        0          0        0.0
+       0         {{ kpd.y | default(4*kp.y) }}     0        0.0
+       0             0      {{ kpd.z | default(4*kp.z) }}   0.0
+%endblock DOS.kgrid_Monkhorst_Pack
+{% endif %}
 
 # --- Bands ---
 {%if bands_calc == 'true' -%}
@@ -71,6 +78,7 @@ BandLinesScale ReciprocalLatticeVectors
 %block BandLines
     {band_path}
 %endblock BandLines
+{% endif %}
 
 # --- Lattice ---
 FixAuxiliaryCell   {{ aux_cell | default('false') }}
@@ -101,6 +109,7 @@ AtomCoorFormatOut          {{ out_format | default('Ang') }}
         {{ c }}
     {%- endfor %}
     %endblock GeometryConstraints
+{% endif %}
 
 # --- Write ---
 {% for w in write -%}

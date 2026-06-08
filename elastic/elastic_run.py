@@ -78,15 +78,15 @@ def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any
             path_eps = deform_path / f"{eps:12.3}"
             path_eps.mkdir(parents=True ,exist_ok=True)
             R = df.deform(R0, j)
-            bi.config_yaml('program')(path_eps, R0, config_yaml)
+            bi.config_yaml('program')(path_eps, R0, config_yaml)################################################################################# arrumar
             path_output = run(path_eps)
-            total_energy = utils.colect_optimized_energy(path_output)
+            total_energy = utils.colect_optimized_energy(path_output)############################################################################ arrumar
             s_e.append([str(j), total_energy])
 
             if j == 0.00:
                 e0 = total_energy #unstrained energy
             
-        with open(os.path.join(path,f"strain_energy_{deform}.dat"), "w") as outfile:
+        with open(deform_path / f"strain_energy_{deform.__name__}.dat", "w") as outfile:
             for line in s_e:
                 outfile.write(f"{line[0]:12.6f} {line[1]-e0:12.6f}\n")
 

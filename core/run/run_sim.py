@@ -2,7 +2,7 @@ import os
 import json
 import yaml
 import subprocess
-from core.global_config.config_yaml import config
+from core.global_config.config import config
 
 def yaml_read():
     """

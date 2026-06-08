@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from config_yaml import config
+from core.global_config.config import config
 
 @dataclass
 class Global_Config:
