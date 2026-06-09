@@ -18,62 +18,57 @@ NumberOfSpecies     {{ species | length }}
 %endblock ChemicalSpeciesLabel
 
 # --- PAO Basis ---
-PAO.BasisSize       {{ basis_size | default('DZP') }}
-PAO.EnergyShift     {{ energy_shift | default('0.01 Ry') }}
+PAO.BasisSize       {{ basis_size | default(DZP) }}
+PAO.EnergyShift     {{ energy_shift | default(0.01 Ry) }}
 
 # --- SCF ---
-SolutionMethod      Diagon
-MaxSCFIterations    2000
-ElectronicTemperature 300 K
-SCF.Mixer.Method pulay
-SCF.Mixer.Weight 0.05
-SCF.Mixer.History 10
-SCF.Mixer.Restart 30
-SCF.Mixer.Restart.Save 4
-SCF.Mixer.Linear.After 0
-SCF.Mixer.Linear.After.Weight 0.1
-SCF.DM.Tolerance    {{ dm_tol | default('1d-6') }}
+SolutionMethod         {{ scf_method | default(Diagon) }}
+MaxSCFIterations       {{ n_scf | default(1000) }}
+ElectronicTemperature  {{ electronic_temp | default(300 K) }}
+SCF.Mixer.Method       {{ scf_mix_method | default(pulay) }}
+SCF.Mixer.Weight       {{ scf_mix_weigth | default(0.05) }}
+SCF.DM.Tolerance       {{ dm_tol | default(1d-6) }}
 
 # --- MD ---
 MD.TypeOfRun        {{ md_type | default('CG') }}
-MD.steps            {{ md_steps | default(5000) }}
-MD.MaxDispl 0.2 Ang
-MD.UseSaveXV false
-MD.UseSaveCG false
-DM.UseSaveDM        {{ use_dm | default('false') }}
-UseSaveData         {{ use_data | default('false') }}
-MD.MaxForceTol      {{ force_tol | default('0.01 eV/Ang') }}
-MD.MaxStressTol     {{ stress_tol | default('0.0 GPa') }}
+MD.steps            {{ md_steps | default(1000) }}
+MD.MaxDispl         {{ md_max_disp | default(0.2 Ang) }} 
+MD.UseSaveXV        {{ md_use_xv | default(false) }}
+MD.UseSaveCG        {{ md_use_cg | default(false) }}
+DM.UseSaveDM        {{ use_dm | default(false) }}
+UseSaveData         {{ use_data | default(false) }}
+MD.MaxForceTol      {{ force_tol | default(0.01 eV/Ang) }}
+MD.MaxStressTol     {{ stress_tol | default(0.0 GPa) }}
 
 # --- Mesh ---
-Mesh.Cutoff         {{ mesh_cutoff | default('300 Ry') }}
+Mesh.Cutoff         {{ mesh_cutoff | default(300 Ry) }}
 
 # --- Charge & Spin ---
-NetCharge           {{ mesh_cutoff | default('0') }}
-Spin                {{ mesh_cutoff | default('non-polarized') }}
+NetCharge           {{ mesh_cutoff | default(0') }}
+Spin                {{ mesh_cutoff | default(non-polarized) }}
 
 # --- Kpoints --- 
 %block kgrid_Monkhorst_Pack
-   {{ kp.x }}        0          0        0.0
-       0         {{ kp.y }}     0        0.0
-       0             0      {{ kp.z }}   0.0
+   {{ kp_x }}        0          0        0.0
+       0         {{ kp_y }}     0        0.0
+       0             0      {{ kp_z }}   0.0
 %endblock kgrid_Monkhorst_Pack
 
 # --- DOS ---
-{%if dos_calc == 'true' -%}
+{%if dos_calc == True -%}
 %block ProjectedDensityOfStates
     {dos_config | default('-15.00 15.00 0.0500 10000 eV')}
 %endblock ProjectedDensityOfStates
  
 %block DOS.kgrid_Monkhorst_Pack
-   {{ kpd.x | default(4*kp.x) }}        0          0        0.0
-       0         {{ kpd.y | default(4*kp.y) }}     0        0.0
-       0             0      {{ kpd.z | default(4*kp.z) }}   0.0
+   {{ kpd_x | default(4*kp_x) }}        0          0        0.0
+       0         {{ kpd_y | default(4*kp_y) }}     0        0.0
+       0             0      {{ kpd_z | default(4*kp_z) }}   0.0
 %endblock DOS.kgrid_Monkhorst_Pack
 {% endif %}
 
 # --- Bands ---
-{%if bands_calc == 'true' -%}
+{%if bands_calc == True -%}
 BandLinesScale ReciprocalLatticeVectors
 %block BandLines
     {band_path}
@@ -81,8 +76,8 @@ BandLinesScale ReciprocalLatticeVectors
 {% endif %}
 
 # --- Lattice ---
-FixAuxiliaryCell   {{ aux_cell | default('false') }}
-MD.VariableCell    {{ var_cell | default('true') }}
+FixAuxiliaryCell   {{ aux_cell | default(false) }}
+MD.VariableCell    {{ var_cell | default(true) }}
 %block LatticeVectors
 {% for vector in lattice -%}
     {% for v in vector -%}
@@ -103,7 +98,7 @@ AtomCoorFormatOut          {{ out_format | default('Ang') }}
 %endblock AtomicCoordinatesAndAtomicSpecies
 
 # --- Constrains ---
-{%if constrains == 'true' -%}
+{%if constrains == True -%}
     %block GeometryConstraints
     {% for c in sys_constrains -%}
         {{ c }}

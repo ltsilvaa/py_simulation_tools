@@ -1,0 +1,66 @@
+# ==============================================================================
+# Input altomatically generated from the .yaml file
+# ==============================================================================
+
+# --- Name --- 
+SystemName          {{ sim_name | default('siesta') }}
+SystemLabel         {{ sim_name | default('siesta') }}
+
+# --- Numbers ---
+NumberOfAtoms       {{ n_atoms }}
+NumberOfSpecies     {{ species | length }}
+
+# --- PAO Basis ---
+PAO.BasisSize       {{ basis_size | default(DZP) }}
+PAO.EnergyShift     {{ energy_shift | default(0.01 Ry) }}
+
+# --- SCF ---
+SolutionMethod         {{ scf_method | default(Diagon) }}
+MaxSCFIterations       {{ n_scf | default(1000) }}
+ElectronicTemperature  {{ electronic_temp | default(300 K) }}
+SCF.Mixer.Method       {{ scf_mix_method | default(pulay) }}
+SCF.Mixer.Weight       {{ scf_mix_weigth | default(0.05) }}
+SCF.DM.Tolerance       {{ dm_tol | default(1d-6) }}
+
+# --- MD ---
+MD.TypeOfRun        {{ md_type | default('CG') }}
+MD.steps            {{ md_steps | default(1000) }}
+MD.MaxDispl         {{ md_max_disp | default(0.2 Ang) }} 
+MD.UseSaveXV        {{ md_use_xv | default(false) }}
+MD.UseSaveCG        {{ md_use_cg | default(false) }}
+DM.UseSaveDM        {{ use_dm | default(false) }}
+UseSaveData         {{ use_data | default(false) }}
+MD.MaxForceTol      {{ force_tol | default(0.01 eV/Ang) }}
+MD.MaxStressTol     {{ stress_tol | default(0.0 GPa) }}
+
+# --- Mesh ---
+Mesh.Cutoff         {{ mesh_cutoff | default(300 Ry) }}
+
+# --- Charge & Spin ---
+NetCharge           {{ mesh_cutoff | default(0') }}
+Spin                {{ mesh_cutoff | default(non-polarized) }}
+
+# --- Kpoints --- 
+%block kgrid_Monkhorst_Pack
+   {{ kp_x }}        0          0        0.0
+       0         {{ kp_y }}     0        0.0
+       0             0      {{ kp_z }}   0.0
+%endblock kgrid_Monkhorst_Pack
+
+# --- Lattice ---
+FixAuxiliaryCell   {{ aux_cell | default(false) }}
+MD.VariableCell    {{ var_cell | default(true) }}
+
+# --- Constrains ---
+{%if constrains == True -%}
+    %block GeometryConstraints
+    {% for c in sys_constrains -%}
+        {{ c }}
+    {%- endfor %}
+    %endblock GeometryConstraints
+{% endif %}
+
+# --- Write ---
+{% for w in write -%}
+    {{ w }}
+{%- endfor %}
