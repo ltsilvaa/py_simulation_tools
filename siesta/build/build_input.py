@@ -13,7 +13,8 @@ def struc_out2fdf(config: dict, path_opt: str):
         Returns:
             None
     """
-    path_struc = path_opt / "{config.get('sim_name').STRUCT_OUT}"
+    sim_name = config.get('sim_name')
+    path_struc = path_opt / "{sim_name}.STRUCT_OUT"
     if not path_struc.exists():
         raise FileNotFoundError(
             f""
@@ -35,8 +36,7 @@ def struc_out2fdf(config: dict, path_opt: str):
 
         opt_fdf = "\n".join("".join(i for i in xyz_frac)+" "+species_id)
 
-    config['lattice'] = opt_vectors
-    config['atoms'] = opt_fdf
+    return opt_vectors, opt_fdf
     
     
 def bands_dos(config: dict, path_opt: str):
@@ -60,7 +60,7 @@ def elastic(config: dict, path_opt: str):
     struc_out2fdf(config, path_opt)
     config.update({'var_cell': 'false'})
 
-def New_sim_type(config: dict):
+def New_sim_type(config: dict): #for future features\
     pass
 
 SIM_TYPES = {
@@ -71,7 +71,7 @@ SIM_TYPES = {
     'phonopy': phonopy
 }
 
-def build_input(config_yaml: dict, path_opt: str, sim_type: str):
+def build_input(config_yaml: dict, working_dir: str, sim_type: str, def_R = None):
     """
         Creates an input file for the siesta code based on the simulation type.
 
@@ -81,8 +81,12 @@ def build_input(config_yaml: dict, path_opt: str, sim_type: str):
         Returns
             None
     """
+    path_opt = working_dir / str('opt')
     config_temp = copy.deepcopy(config_yaml)
     env = Environment(loader=FileSystemLoader(Path(__file__).parent))
+
+    if def_R is not None and sim_type == 'elastic':
+        config_temp['lattice'] = def_R
     
     if sim_type == 'phonopy':
         template = env.get_template('template_phonopy.fdf')

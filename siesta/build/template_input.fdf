@@ -21,6 +21,10 @@ NumberOfSpecies     {{ species | length }}
 PAO.BasisSize       {{ basis_size | default(DZP) }}
 PAO.EnergyShift     {{ energy_shift | default(0.01 Ry) }}
 
+# --- XC Functional ---
+XC.functional       {{ xc_approx | default(GGA) }}
+XC.authors          {{ xc_func | default(PBE) }}
+
 # --- SCF ---
 SolutionMethod         {{ scf_method | default(Diagon) }}
 MaxSCFIterations       {{ n_scf | default(1000) }}
@@ -44,7 +48,7 @@ MD.MaxStressTol     {{ stress_tol | default(0.0 GPa) }}
 Mesh.Cutoff         {{ mesh_cutoff | default(300 Ry) }}
 
 # --- Charge & Spin ---
-NetCharge           {{ mesh_cutoff | default(0') }}
+NetCharge           {{ net_charge | default(0) }}
 Spin                {{ mesh_cutoff | default(non-polarized) }}
 
 # --- Kpoints --- 
@@ -74,6 +78,11 @@ BandLinesScale ReciprocalLatticeVectors
     {band_path}
 %endblock BandLines
 {% endif %}
+
+# --- Dispersion --- 
+DFTD3               {{ d3 | default(false) }}
+DFTD3.UseXCDefaults {{ d3_xc | default(false) }}
+DFTD3.BJdamping     {{ d3_bj | default(false) }}
 
 # --- Lattice ---
 FixAuxiliaryCell   {{ aux_cell | default(false) }}

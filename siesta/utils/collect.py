@@ -1,6 +1,6 @@
 import re
 
-def colect_optimized_vectors(path_output: str):
+def collect_optimized_vectors(path_output: str):
     """
         Args:
 
@@ -14,12 +14,12 @@ def colect_optimized_vectors(path_output: str):
 
     return optimized_vectors.group(1)
 
-def colect_optmized_geometry(path_output: str):
+def collect_optmized_geometry(path_output: str):
     """
         Args:
             
         Returns:
-            optimized_geometry (string): Optimized geometry colectred from the output file 
+            optimized_geometry (string): Optimized geometry collectred from the output file 
     """
     optimized_geometry_pattern =  r'outcoor: Relaxed.*?\n(.*?)\noutcell: Unit'
     with open(path_output, "r", errors="ignore") as output_file:
@@ -28,13 +28,14 @@ def colect_optmized_geometry(path_output: str):
 
     return optimized_geometry.group(1)
 
-def colect_optimized_energy(path_output: str):
+def collect_optimized_energy(path_output: str):
     """
-    
+        collects the total energy in eV from the siesta output file.
+
         Args:
-            path_output (string):
-        Return:
-            final_energy (float):
+            path_output (str): Path to the output file.
+        Returns:
+            Total energy of the sistem after the calculation.
     """
     with open(path_output, "r", errors="ignore") as output_file:
         lines = output_file.readlines()
@@ -45,13 +46,14 @@ def colect_optimized_energy(path_output: str):
 
     return final_energy 
 
-def colect_optimized_volume(path_output: str):
+def collect_optimized_volume(path_output: str):
     """
+        collects the volume in Ang**3 from the siesta output file.
     
         Args:
-            path_output (string):
-        Return:
-            final_volume (float):
+            path_output (str): Path to the output file.
+        Returns:
+            Volume of the sistem cell after the calculation.
     """
     with open(path_output, "r", errors="ignore") as output_file:
         lines = output_file.readlines()

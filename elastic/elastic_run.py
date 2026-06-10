@@ -1,6 +1,5 @@
 import os
 import deformation as df
-import build_input as bi
 from pathlib import Path
 from typing import Callable, Any
 from ase.geometry import Cell
@@ -52,7 +51,26 @@ def deformations_per_symmetry(R0, config_yaml: dict):
         elif cell_type == "OBL":
             return [df.def_11, df.def_12, df.def_16, df.def_26, df.def_22, df.def_66]
 
-def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any], utils: Callable[..., Any], R0):
+def input_extension(config: dict):
+    """
+        Returns the correct exetension for the input file.
+
+        Args: 
+            config (dict): Configuration file of the simulation.
+        Returns:
+            Input file name with the correct extension.
+    """        
+    SIM_INPUT_NAME = {
+        'siesta': 'input.fdf',
+        'qe': 'input.in',
+        'castep': '',
+        'onetep': '',
+        'cp2k': '',
+        'dftb': ''
+    }
+    return SIM_INPUT_NAME.get(config.get('sim_code'))     
+
+def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any], utils: Callable[..., Any], build_input: Callable[..., Any], R0):
     """
         Runs the calculations of the deformed structure with the desired simulation code to compute
         the elastic constants through the energy-strain approach.
@@ -70,6 +88,10 @@ def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any
     max_deformation = float(config_yaml.get('max_def',0.01))
     deformations_number = int(config_yaml.get('num_def',7))
 
+    
+    path_opt_output = working_dir / 'opt' / 'log.out'
+    E0 = utils.collect_optimized_energy(path_opt_output)
+
     eps = [(-max_deformation + (max_deformation/(deformations_number/2))*i) for i in range(deformations_number)]
     for deform in deformations:
         s_e = []
@@ -78,17 +100,16 @@ def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any
             path_eps = deform_path / f"{eps:12.3}"
             path_eps.mkdir(parents=True ,exist_ok=True)
             R = df.deform(R0, j)
-            bi.config_yaml('program')(path_eps, R0, config_yaml)################################################################################# arrumar
+            path_inp = path_eps / input_extension(config_yaml) 
+            with open(path_inp, "w") as f:
+                f.write(build_input(config_yaml, working_dir, sim_type = 'elastic', def_R = R))
             path_output = run(path_eps)
-            total_energy = utils.colect_optimized_energy(path_output)############################################################################ arrumar
+            total_energy = utils.collect_optimized_energy(path_output)
             s_e.append([str(j), total_energy])
-
-            if j == 0.00:
-                e0 = total_energy #unstrained energy
             
         with open(deform_path / f"strain_energy_{deform.__name__}.dat", "w") as outfile:
             for line in s_e:
-                outfile.write(f"{line[0]:12.6f} {line[1]-e0:12.6f}\n")
+                outfile.write(f"{line[0]:12.6f} {line[1]-E0:12.6f}\n")
 
         strain_energy.append(s_e)
 
