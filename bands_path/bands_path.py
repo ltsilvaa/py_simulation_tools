@@ -23,7 +23,7 @@ def band_path(R0: list, dimension: str):
     bravais_lattice = cell.get_bravais_lattice() 
     bands = bravais_lattice.bandpath()
     symmetry_path = bands.path
-    symmetr_label = [char for char in symmetry_path if char.isupper()]
-    symmetry_points = [bands.special_points[str(l)] for l in symmetr_label]
+    symmetry_label = [char for char in symmetry_path if char.isupper()]
+    symmetry_points = [bands.special_points[str(l)] for l in symmetry_label]
 
-    return symmetry_path+" "+bravais_lattice.name, [arr.tolist() for arr in symmetry_points]
+    return bravais_lattice.name, symmetry_label, [arr.tolist() for arr in symmetry_points]

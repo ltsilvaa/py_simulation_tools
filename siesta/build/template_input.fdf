@@ -3,59 +3,59 @@
 # ==============================================================================
 
 # --- Name --- 
-SystemName          {{ sim_name | default('siesta') }}
-SystemLabel         {{ sim_name | default('siesta') }}
+SystemName          {{ SystemName | default('siesta') }}
+SystemLabel         {{ SystemLabel | default('siesta') }}
 
 # --- Numbers ---
-NumberOfAtoms       {{ n_atoms }}
-NumberOfSpecies     {{ species | length }}
+NumberOfAtoms       {{ NumberOfAtoms }}
+NumberOfSpecies     {{ NumberOfSpecies | length }}
 
 # --- Labels ---
 %block ChemicalSpeciesLabel
-{% for s in species -%}
-   {{ s.id }}  {{ s.atomic_number }}  {{ s.symbol }}
+{% for s in Species -%}
+   {{ s.Id }}  {{ s.Z }}  {{ s.Symbol }}
 {%- endfor %}
 %endblock ChemicalSpeciesLabel
 
 # --- PAO Basis ---
-PAO.BasisSize       {{ basis_size | default(DZP) }}
-PAO.EnergyShift     {{ energy_shift | default(0.01 Ry) }}
+PAO.BasisSize       {{ PAO.BasisSize | default(DZP) }}
+PAO.EnergyShift     {{ PAO.EnergyShift | default(0.01 Ry) }}
 
 # --- XC Functional ---
-XC.functional       {{ xc_approx | default(GGA) }}
-XC.authors          {{ xc_func | default(PBE) }}
+XC.functional       {{ XC.functional | default(GGA) }}
+XC.authors          {{ XC.authors | default(PBE) }}
 
 # --- SCF ---
-SolutionMethod         {{ scf_method | default(Diagon) }}
-MaxSCFIterations       {{ n_scf | default(1000) }}
-ElectronicTemperature  {{ electronic_temp | default(300 K) }}
-SCF.Mixer.Method       {{ scf_mix_method | default(pulay) }}
-SCF.Mixer.Weight       {{ scf_mix_weigth | default(0.05) }}
-SCF.DM.Tolerance       {{ dm_tol | default(1d-6) }}
+SolutionMethod         {{ SolutionMethod | default(Diagon) }}
+MaxSCFIterations       {{ MaxSCFIterations | default(1000) }}
+ElectronicTemperature  {{ ElectronicTemperature | default(300 K) }}
+SCF.Mixer.Method       {{ SCF.Mixer.Method | default(pulay) }}
+SCF.Mixer.Weight       {{ SCF.Mixer.Weight | default(0.05) }}
+SCF.DM.Tolerance       {{ SCF.DM.Tolerance | default(1d-6) }}
 
 # --- MD ---
-MD.TypeOfRun        {{ md_type | default('CG') }}
-MD.steps            {{ md_steps | default(1000) }}
-MD.MaxDispl         {{ md_max_disp | default(0.2 Ang) }} 
-MD.UseSaveXV        {{ md_use_xv | default(false) }}
-MD.UseSaveCG        {{ md_use_cg | default(false) }}
-DM.UseSaveDM        {{ use_dm | default(false) }}
-UseSaveData         {{ use_data | default(false) }}
-MD.MaxForceTol      {{ force_tol | default(0.01 eV/Ang) }}
-MD.MaxStressTol     {{ stress_tol | default(0.0 GPa) }}
+MD.TypeOfRun        {{ MD.TypeOfRun | default('CG') }}
+MD.steps            {{ MD.steps | default(1000) }}
+MD.MaxDispl         {{ MD.MaxDispl | default(0.2 Ang) }} 
+MD.UseSaveXV        {{ MD.UseSaveXV | default(false) }}
+MD.UseSaveCG        {{ MD.UseSaveCG | default(false) }}
+DM.UseSaveDM        {{ MD.UseSaveDM | default(false) }}
+UseSaveData         {{ MD.UseSaveData | default(false) }}
+MD.MaxForceTol      {{ MD.MaxForceTol | default(0.01 eV/Ang) }}
+MD.MaxStressTol     {{ MD.MaxStressTol | default(0.0 GPa) }}
 
 # --- Mesh ---
-Mesh.Cutoff         {{ mesh_cutoff | default(300 Ry) }}
+Mesh.Cutoff         {{ Mesh.Cutoff | default(300 Ry) }}
 
 # --- Charge & Spin ---
-NetCharge           {{ net_charge | default(0) }}
-Spin                {{ mesh_cutoff | default(non-polarized) }}
+NetCharge           {{ NetCharge | default(0) }}
+Spin                {{ Spin | default(non-polarized) }}
 
 # --- Kpoints --- 
 %block kgrid_Monkhorst_Pack
-   {{ kp_x }}        0          0        0.0
-       0         {{ kp_y }}     0        0.0
-       0             0      {{ kp_z }}   0.0
+   {{ kp[0] }}        0          0        0.0
+       0         {{ kp[1] }}     0        0.0
+       0             0      {{ kp[2] }}   0.0
 %endblock kgrid_Monkhorst_Pack
 
 # --- DOS ---
@@ -65,9 +65,9 @@ Spin                {{ mesh_cutoff | default(non-polarized) }}
 %endblock ProjectedDensityOfStates
  
 %block DOS.kgrid_Monkhorst_Pack
-   {{ kpd_x | default(4*kp_x) }}        0          0        0.0
-       0         {{ kpd_y | default(4*kp_y) }}     0        0.0
-       0             0      {{ kpd_z | default(4*kp_z) }}   0.0
+   {{ kpdos[0] | default(4*kp[0]) }}        0          0        0.0
+       0         {{ kpdos[1] | default(4*kp[1]) }}     0        0.0
+       0             0      {{ kpdos[2] | default(4*kp[2]) }}   0.0
 %endblock DOS.kgrid_Monkhorst_Pack
 {% endif %}
 
@@ -80,15 +80,15 @@ BandLinesScale ReciprocalLatticeVectors
 {% endif %}
 
 # --- Dispersion --- 
-DFTD3               {{ d3 | default(false) }}
-DFTD3.UseXCDefaults {{ d3_xc | default(false) }}
-DFTD3.BJdamping     {{ d3_bj | default(false) }}
+DFTD3               {{ DFTD3 | default(false) }}
+DFTD3.UseXCDefaults {{ DFTD3.UseXCDefaults | default(false) }}
+DFTD3.BJdamping     {{ DFTD3;BJdamping | default(false) }}
 
 # --- Lattice ---
-FixAuxiliaryCell   {{ aux_cell | default(false) }}
-MD.VariableCell    {{ var_cell | default(true) }}
+FixAuxiliaryCell   {{ FixAuxiliaryCell | default(false) }}
+MD.VariableCell    {{ MD.VariableCell | default(true) }}
 %block LatticeVectors
-{% for vector in lattice -%}
+{% for vector in LatticeVectors -%}
     {% for v in vector -%}
         {{ "%10.5f" | format(v) }}
     {%- endfor %}
@@ -96,10 +96,10 @@ MD.VariableCell    {{ var_cell | default(true) }}
 %endblock LatticeVectors
 
 # --- Geometry ---
-AtomicCoordinatesFormat    {{ inp_format | default('Ang') }}
-AtomCoorFormatOut          {{ out_format | default('Ang') }}
+AtomicCoordinatesFormat    {{ AtomicCoordinatesFormat | default('Ang') }}
+AtomCoorFormatOut          {{ AtomCoorFormatOut | default('Ang') }}
 %block AtomicCoordinatesAndAtomicSpecies
-{% for atom in atoms -%}
+{% for atom in Atoms -%}
     {% for cord in atom -%}
         {{ "%10.6f" | format(cord) }}
     {%- endfor %}    
@@ -109,13 +109,13 @@ AtomCoorFormatOut          {{ out_format | default('Ang') }}
 # --- Constrains ---
 {%if constrains == True -%}
     %block GeometryConstraints
-    {% for c in sys_constrains -%}
+    {% for c in GeometryConstraints -%}
         {{ c }}
     {%- endfor %}
     %endblock GeometryConstraints
 {% endif %}
 
 # --- Write ---
-{% for w in write -%}
+{% for w in Write -%}
     {{ w }}
 {%- endfor %}

@@ -1,9 +1,10 @@
 #import bands.siesta_format as sf
 import copy
+import bands_path.bands_path as bp
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
-def struc_out2fdf(config: dict, path_opt: str):
+def struc_out2fdf(path_opt: str):
     """
         Converts the .STRUCT_OUT file from te XV format to the FDF format.
 
@@ -13,7 +14,6 @@ def struc_out2fdf(config: dict, path_opt: str):
         Returns:
             None
     """
-    sim_name = config.get('sim_name')
     path_struc = path_opt / "{sim_name}.STRUCT_OUT"
     if not path_struc.exists():
         raise FileNotFoundError(
@@ -37,28 +37,34 @@ def struc_out2fdf(config: dict, path_opt: str):
         opt_fdf = "\n".join("".join(i for i in xyz_frac)+" "+species_id)
 
     return opt_vectors, opt_fdf
+
+def band_format(config: dict):
+    """
+    
+    """
+    
     
     
 def bands_dos(config: dict, path_opt: str):
-    struc_out2fdf(config, path_opt)
-    config.update({'bands_calc': 'true', 'dos_calc': 'true', 'var_cell': 'false'})
+    opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    config.update({'bands_calc': True, 'dos_calc': True, 'MD.VariableCell': False})
 
 def bands(config: dict, path_opt: str):
-    struc_out2fdf(config, path_opt)
-    config.update({'bands_calc': 'true', 'var_cell': 'false'})
+    opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    config.update({'bands_calc': True, 'MD.VariableCell': False})
 
 def dos(config: dict, path_opt: str):
-    struc_out2fdf(config, path_opt)
-    config.update({'dos_calc': 'true', 'var_cell': 'false'})
+    opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    config.update({'dos_calc': True, 'MD.VariableCell': False})
 
 def phonopy(config: dict, path_opt: str):
-    struc_out2fdf(config, path_opt)
+    opt_vec, opt_fdf = struc_out2fdf(path_opt)
     super_cell_n_atoms =  config.get('sc_ph_x')*config.get('sc_ph_y')*config.get('sc_ph_z')*config.get('n_atoms')
-    config.update({'var_cell': 'false', 'md_steps': '0', 'n_atoms': super_cell_n_atoms})
+    config.update({'MD.VariableCell': False, 'MD.steps': '0', 'NumberOfAtoms': super_cell_n_atoms})
 
 def elastic(config: dict, path_opt: str):
-    struc_out2fdf(config, path_opt)
-    config.update({'var_cell': 'false'})
+    opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    config.update({'MD.VariableCell': False})
 
 def New_sim_type(config: dict): #for future features\
     pass
@@ -71,7 +77,7 @@ SIM_TYPES = {
     'phonopy': phonopy
 }
 
-def build_input(config_yaml: dict, working_dir: str, sim_type: str, def_R = None):
+def build_input(config_yaml: dict, work_dir: str, sim_type: str, def_R = None):
     """
         Creates an input file for the siesta code based on the simulation type.
 
@@ -81,12 +87,12 @@ def build_input(config_yaml: dict, working_dir: str, sim_type: str, def_R = None
         Returns
             None
     """
-    path_opt = working_dir / str('opt')
+    path_opt = work_dir / str('opt')
     config_temp = copy.deepcopy(config_yaml)
     env = Environment(loader=FileSystemLoader(Path(__file__).parent))
 
     if def_R is not None and sim_type == 'elastic':
-        config_temp['lattice'] = def_R
+        config_temp['LatticeVectors'] = def_R
     
     if sim_type == 'phonopy':
         template = env.get_template('template_phonopy.fdf')

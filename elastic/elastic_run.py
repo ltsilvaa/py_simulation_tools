@@ -1,4 +1,3 @@
-import os
 import deformation as df
 from pathlib import Path
 from typing import Callable, Any
@@ -70,7 +69,7 @@ def input_extension(config: dict):
     }
     return SIM_INPUT_NAME.get(config.get('sim_code'))     
 
-def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any], utils: Callable[..., Any], build_input: Callable[..., Any], R0):
+def run_deformations(work_dir: str, config_yaml: dict, run: Callable[..., Any], utils: Callable[..., Any], build_input: Callable[..., Any], R0):
     """
         Runs the calculations of the deformed structure with the desired simulation code to compute
         the elastic constants through the energy-strain approach.
@@ -79,6 +78,8 @@ def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any
             working_dir (str): Path to the simulation directory.
             config_yaml (dict): Configuration file of the simulation.
             run (Callable): Correct funtion to run the simulaiton.
+            utils (Callable): Correct funtions to colect data from the simulation output.
+            build_input (Callable): Correct funtion to build the simulation input.
             R0 (list): Lattice vectors of the optmized structure.
         Returns:
             List with the necessary deformations fo the structure.
@@ -89,20 +90,20 @@ def run_deformations(working_dir: str, config_yaml: dict, run: Callable[..., Any
     deformations_number = int(config_yaml.get('num_def',7))
 
     
-    path_opt_output = working_dir / 'opt' / 'log.out'
+    path_opt_output = work_dir / 'opt' / 'log.out'
     E0 = utils.collect_optimized_energy(path_opt_output)
 
     eps = [(-max_deformation + (max_deformation/(deformations_number/2))*i) for i in range(deformations_number)]
     for deform in deformations:
         s_e = []
-        deform_path = working_dir / str(deform.__name__)
+        deform_path = work_dir / str(deform.__name__)
         for j in eps:
             path_eps = deform_path / f"{eps:12.3}"
             path_eps.mkdir(parents=True ,exist_ok=True)
             R = df.deform(R0, j)
             path_inp = path_eps / input_extension(config_yaml) 
             with open(path_inp, "w") as f:
-                f.write(build_input(config_yaml, working_dir, sim_type = 'elastic', def_R = R))
+                f.write(build_input(config_yaml, work_dir, sim_type = 'elastic', def_R = R))
             path_output = run(path_eps)
             total_energy = utils.collect_optimized_energy(path_output)
             s_e.append([str(j), total_energy])
