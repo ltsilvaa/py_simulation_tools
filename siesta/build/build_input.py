@@ -1,6 +1,6 @@
 #import bands.siesta_format as sf
 import copy
-import bands_path.bands_path as bp
+import symmetry_path.sym_path as sp
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
@@ -38,19 +38,35 @@ def struc_out2fdf(path_opt: str):
 
     return opt_vectors, opt_fdf
 
-def band_format(config: dict):
+def band_format(opt_vec, config: dict):
     """
-    
+        Formats the band path for the format used in SIESTA code.
+
+        Args:
+            config (dict): Copy of the config_yaml dictionary.
+            path_opt (str): Path to the STRUCT_OUT of the optmized structure. 
+        Returns:
+            None
     """
+    first = True
+    latt_name, sym_label, sym_points = sp(opt_vec, config.get('dim'))
+    for label, point in zip(sym_label, sym_points):
+        if first:
+            kp_number = '1'
+        else:
+            kp_number = '100'
+        band_path += kp_number+' '.join(coord for coord in point)+' '+label
     
-    
+    config.update({'band_path': band_path})
     
 def bands_dos(config: dict, path_opt: str):
     opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    band_format(opt_vec, config)
     config.update({'bands_calc': True, 'dos_calc': True, 'MD.VariableCell': False})
 
 def bands(config: dict, path_opt: str):
     opt_vec, opt_fdf = struc_out2fdf(path_opt)
+    band_format(opt_vec, config)
     config.update({'bands_calc': True, 'MD.VariableCell': False})
 
 def dos(config: dict, path_opt: str):
