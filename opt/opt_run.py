@@ -14,7 +14,7 @@ def input_extension(config: dict):
         'siesta': 'input.fdf',
         'qe': 'input.in',
         'castep': '',
-        'onetep': '',
+        'onetep': 'input.dat',
         'cp2k': '',
         'dftb': ''
     }
