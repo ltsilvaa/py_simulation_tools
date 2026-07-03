@@ -6,7 +6,7 @@ def replace_input_geometry(work_directory: str, input_name: str, new_geometry: s
     
     """
     path_input = os.path.join(work_directory,input_name)
-    input_geometry_pattern = r"%block AtomicCoordinatesAndAtomicSpecies.*?\n(.*?)%endblock AtomicCoordinatesAndAtomicSpecies"
+    input_geometry_pattern = r"ATOMIC_POSITIONS\s*\(crystal\).*?\n(.*?)(?=\n\s*\n|\n[A-Z_]+)"
     with open(path_input, "r", errors="ignore") as input_file:
         text = input_file.read()
         old_input_geometry = re.search(input_geometry_pattern, text, re.DOTALL)
@@ -20,7 +20,7 @@ def replace_input_vectors(work_directory: str,  input_name: str, new_vectors: st
 
     """
     path_input = os.path.join(work_directory, input_name)
-    input_vectors_pattern = r"%block LatticeVectors\n.*?(.*?)%endblock LatticeVectors"
+    input_vectors_pattern = r"CELL_PARAMETERS\s*\(crystal\).*?\n(.*?)(?=\n\s*\n|\n[A-Z_]+)"
     with open(path_input, "r", errors="ignore") as input_file:
         text = input_file.read()
         input_vectors = re.search(input_vectors_pattern, text, re.DOTALL)
